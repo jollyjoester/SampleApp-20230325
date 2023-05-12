@@ -1,21 +1,53 @@
-//
-//  ContentView.swift
-//  SampleApp-20230325
-//
-//  Created by Hideyuki Nanashima on 2023/03/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isTodoInputViewPresented = false
+    @State private var todoList: [Todo] = []
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationStack {
+            VStack(spacing: 0) {
+                List(todoList, id: \.self) { todo in
+                    HStack {
+                        Text(todo.content)
+                        Text(stringFromDate(date: todo.date))
+                    }
+                }
+                Button(action: {
+                    todoList = getTodoListFromUserDefaults()
+                }, label: {
+                    Text("更新")
+                })
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        isTodoInputViewPresented = true
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                    .sheet(isPresented: $isTodoInputViewPresented) {
+                        TodoInputView()
+                    }
+                }
+            }
         }
-        .padding()
+    }
+    
+    private func stringFromDate(date: Date) -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "yyyy/MM/dd"
+        return formatter.string(from: date)
+    }
+    
+    private func getTodoListFromUserDefaults() -> [Todo] {
+        if let data = UserDefaults.standard.object(forKey: "TodoList") as? Data,
+           let todoList = try? JSONDecoder().decode([Todo].self, from: data) {
+            return todoList
+        } else {
+            return []
+        }
     }
 }
 
