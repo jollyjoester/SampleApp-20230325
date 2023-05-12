@@ -15,15 +15,15 @@ struct TodoInputView: View {
             )
             Button(action: {
                 guard !text.isEmpty else { return }
-                
-                var todoList = UserDefaults.standard.array(forKey: "TodoList") as? [Todo] ?? []
+                // UserDefaultからData型のTodoListを取得して[Todo]型に変換する
+                var todoList = Todo.getTodoListFromUserDefaults()
+//                var todoList = UserDefaults.standard.object(forKey: "TodoList") as? [Todo] ?? []
                 
                 let todo = Todo(content: text, date: date)
                 todoList.append(todo)
                 
-                if let encoded = try? JSONEncoder().encode(todoList) {
-                    UserDefaults.standard.set(encoded, forKey: "TodoList")
-                }
+                // [Todo]型をData型に変換してUserDefaultに保存
+                Todo.setTodoListToUserDefaults(todoList)
             }, label: {
                 Text("追加する")
             })
